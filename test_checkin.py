@@ -75,5 +75,7 @@ def test_datetime():
 
 def test_str():
     """Test str construction"""
-    o = CheckIn("Tom", Pokeball.poke_ball, "Pokemart", "2016-09-10 12:04:02")
-    assert str(o) == "Tom at Pokemart with a Poke Ball (2016-09-10 12:04:02)"
+    o1 = CheckIn("Tom", Pokeball.poke_ball, "Pokemart", "2016-09-10 12:04:02")
+    o2 = CheckIn("Bob", Pokeball.ultra_ball, "Town", "2016-09-10 12:04:02")
+    assert str(o1) == "Tom at Pokemart with a Poke Ball (2016-09-10 12:04:02)"
+    assert str(o2) == "Bob at Town with an Ultra Ball (2016-09-10 12:04:02)"

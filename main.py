@@ -5,7 +5,6 @@ import sys
 
 from checkin import CheckIn
 from checkin_timeline import CheckInTimeline
-from pokeball import Pokeball
 
 
 def load_timeline(filename):
@@ -40,7 +39,24 @@ def load_timeline(filename):
         file. Note that this is thrown by the open() function.
 
     """
-    pass
+    rocket_data = CheckInTimeline()  # stores empty timeline in rocket_data
+    grunt_poke = {}  # stores dict of pokemon indexed by agent names
+    try:
+        with open(filename) as mew:  # file opened
+            rocket_rows = csv.reader(mew)
+            for row in rocket_rows:
+                try:
+                    grunt_row = CheckIn(row[0], row[1], row[2], row[3])
+                except ValueError:
+                    print("Invalid data! CheckIn could not be created!")
+                    sys.exit(1)
+                rocket_data.add(grunt_row)
+                if row[4] != "":  # i.e. if there's a Pokemon listed
+                    grunt_poke[row[0]] = row[4]  # add to dict
+    except OSError:
+        print("Couldn't find or open the file")
+        sys.exit(1)
+    return(grunt_poke, rocket_data)
 
 
 def main(args):
@@ -80,8 +96,32 @@ def main(args):
     :returns: None
 
     """
-    print(args)
+    grunt_poke, rocket_data = load_timeline(args.checkins)
+    for chkin in rocket_data.rendezvous():
 
+        if chkin[0].pokeball == chkin[1].pokeball:  # pokeball types match
+            # Exchange Process Begin
+            traded = grunt_poke[chkin[0].name]
+            grunt_poke[chkin[0].name] = grunt_poke[chkin[1].name]
+            grunt_poke[chkin[1].name] = traded
+            # Exchange Process End
+
+            if args.exchanges:  # exchanges flag
+                print(chkin[0].name, "meets with", chkin[1].name,
+                      "to exchange", grunt_poke[chkin[0].name], "for",
+                      grunt_poke[chkin[1].name])
+        else:
+            if args.skip:  # skip flag
+                print(chkin[0].name + " (with", str(chkin[0].pokeball) + ")",
+                      "meets with " + chkin[1].name + " (with",
+                      str(chkin[1].pokeball) + "),", "but nothing happened.")
+
+    if args.pokemon != "":  # pokemon flag
+        for pair in grunt_poke.items():
+            if pair[1] == args.pokemon:
+                print(pair[0], "had the", pair[1])
+    else:
+        pprint.pprint(grunt_poke, indent=4)
 
 if __name__ == '__main__':
     # Initialize CLI argument parser
